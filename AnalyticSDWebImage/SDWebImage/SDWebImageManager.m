@@ -163,6 +163,8 @@ static id<SDImageLoader> _defaultImageLoader;
     // Preprocess the context arg to provide the default value from manager
     context = [self processedContextWithContext:context];
     
+    
+    // 查询任务和加载任务
     // Start the entry to load image from cache
     [self callCacheProcessForOperation:operation url:url options:options context:context progress:progressBlock completed:completedBlock];
 
@@ -212,18 +214,15 @@ static id<SDImageLoader> _defaultImageLoader;
         // 查找缓存
         operation.cacheOperation = [self.imageCache queryImageForKey:key options:options context:context completion:^(UIImage * _Nullable cachedImage, NSData * _Nullable cachedData, SDImageCacheType cacheType) {
             
-            // 强引用防止被释放
             @strongify(operation);
             if (!operation || operation.isCancelled) {
                 [self safelyRemoveOperationFromRunning:operation];
                 return;
             }
             
-            
             // Continue download process
             [self callDownloadProcessForOperation:operation url:url options:options context:context cachedImage:cachedImage cachedData:cachedData cacheType:cacheType progress:progressBlock completed:completedBlock];
         }];
-        
         
     } else {
         
@@ -245,8 +244,6 @@ static id<SDImageLoader> _defaultImageLoader;
                               cacheType:(SDImageCacheType)cacheType
                                progress:(nullable SDImageLoaderProgressBlock)progressBlock
                               completed:(nullable SDInternalCompletionBlock)completedBlock {
-    
-    
     
     // Check whether we should download image from network
     

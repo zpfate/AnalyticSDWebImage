@@ -61,7 +61,8 @@ const int64_t SDWebImageProgressUnitCountUnknown = 1LL;
     NSString *validOperationKey = context[SDWebImageContextSetImageOperationKey];
     
     if (!validOperationKey) {
-        validOperationKey = NSStringFromClass([self class]); // UIImageView(当前类名)
+        // UIImageView(当前类名)
+        validOperationKey = NSStringFromClass([self class]);
     }
     
     self.sd_latestOperationKey = validOperationKey;
@@ -96,6 +97,7 @@ const int64_t SDWebImageProgressUnitCountUnknown = 1LL;
         id<SDWebImageIndicator> imageIndicator = self.sd_imageIndicator;
 #endif
         
+        // 有自定义的manager就用 否则使用默认的manager
         SDWebImageManager *manager = context[SDWebImageContextCustomManager];
         if (!manager) {
             manager = [SDWebImageManager sharedManager];
@@ -127,10 +129,8 @@ const int64_t SDWebImageProgressUnitCountUnknown = 1LL;
         // 加载图片
         id <SDWebImageOperation> operation = [manager loadImageWithURL:url options:options context:context progress:combinedProgressBlock completed:^(UIImage *image, NSData *data, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
             
-            
             @strongify(self);
             if (!self) { return; }
-            
             
             // if the progress not been updated, mark it to complete state
             if (finished && !error && self.sd_imageProgress.totalUnitCount == 0 && self.sd_imageProgress.completedUnitCount == 0) {

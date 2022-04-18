@@ -81,12 +81,14 @@ static void * SDMemoryCacheContext = &SDMemoryCacheContext;
 
 // `setObject:forKey:` just call this with 0 cost. Override this is enough
 - (void)setObject:(id)obj forKey:(id)key cost:(NSUInteger)g {
+    
     [super setObject:obj forKey:key cost:g];
     if (!self.config.shouldUseWeakMemoryCache) {
         return;
     }
     if (key && obj) {
         // Store weak cache
+        // 又存了一份 不影响当前对象的生命周期
         SD_LOCK(self.weakCacheLock);
         [self.weakCache setObject:obj forKey:key];
         SD_UNLOCK(self.weakCacheLock);

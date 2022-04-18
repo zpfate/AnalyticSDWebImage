@@ -13,6 +13,7 @@ static char loadOperationKey;
 
 // key is strong, value is weak because operation instance is retained by SDWebImageManager's runningOperations property
 // we should use lock to keep thread-safe because these method may not be acessed from main queue
+
 typedef NSMapTable<NSString *, id<SDWebImageOperation>> SDOperationsDictionary;
 
 @implementation UIView (WebCacheOperation)
@@ -31,6 +32,8 @@ typedef NSMapTable<NSString *, id<SDWebImageOperation>> SDOperationsDictionary;
         // 没有通过关联获取到创建的operations字典， 主动创建并建立关联
         
         // NSMapTable功能类似NSDictionary NSPointerFunctionsWeakMemory添加是引用计数不加1
+        
+        // 使用NSMapTable是因为保存当前唯一任务,防止当前对象出现重复请求
         operations = [[NSMapTable alloc] initWithKeyOptions:NSPointerFunctionsStrongMemory valueOptions:NSPointerFunctionsWeakMemory capacity:0];
         
         // 关联属性

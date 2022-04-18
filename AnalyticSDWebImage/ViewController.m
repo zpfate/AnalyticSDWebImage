@@ -10,6 +10,8 @@
 #import "UIImageView+WebCache.h"
 #import <SystemConfiguration/SystemConfiguration.h>
 #import "Person.h"
+
+#import <YYKit.h>
 @interface ViewController ()
 
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
@@ -27,6 +29,8 @@
     // SD加载imageView
     [self.imageView sd_setImageWithURL:[NSURL URLWithString:@"http://img.redocn.com/sheying/20150213/mulanweichangcaoyuanfengjing_3951976.jpg"] placeholderImage:nil options:SDWebImageRetryFailed];
     
+    YYLabel *label = [[YYLabel alloc] init];
+    label.text = @"123";
     
     
 }

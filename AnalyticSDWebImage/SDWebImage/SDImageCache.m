@@ -290,6 +290,9 @@
 }
 
 - (nullable UIImage *)imageFromMemoryCacheForKey:(nullable NSString *)key {
+    
+    
+    
     return [self.memCache objectForKey:key];
 }
 
