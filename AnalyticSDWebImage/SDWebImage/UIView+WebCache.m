@@ -12,6 +12,7 @@
 #import "SDWebImageError.h"
 #import "SDInternalMacros.h"
 
+// LL代表long long
 const int64_t SDWebImageProgressUnitCountUnknown = 1LL;
 
 @implementation UIView (WebCache)
@@ -105,7 +106,6 @@ const int64_t SDWebImageProgressUnitCountUnknown = 1LL;
         
         @weakify(self);
         
-        
         // 下载进度的block
         SDImageLoaderProgressBlock combinedProgressBlock = ^(NSInteger receivedSize, NSInteger expectedSize, NSURL * _Nullable targetURL) {
             
@@ -128,13 +128,14 @@ const int64_t SDWebImageProgressUnitCountUnknown = 1LL;
             }
         };
         
-        // 加载图片
+        // 加载图片 优先查找内存缓存->磁盘缓存->NSCache->下载
         id <SDWebImageOperation> operation = [manager loadImageWithURL:url options:options context:context progress:combinedProgressBlock completed:^(UIImage *image, NSData *data, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
             
             @strongify(self);
             if (!self) { return; }
             
             // if the progress not been updated, mark it to complete state
+            // 如果进度没有被更新,标记他为完成状态
             if (finished && !error && self.sd_imageProgress.totalUnitCount == 0 && self.sd_imageProgress.completedUnitCount == 0) {
                 self.sd_imageProgress.totalUnitCount = SDWebImageProgressUnitCountUnknown;
                 self.sd_imageProgress.completedUnitCount = SDWebImageProgressUnitCountUnknown;
@@ -142,12 +143,12 @@ const int64_t SDWebImageProgressUnitCountUnknown = 1LL;
             
 #if SD_UIKIT || SD_MAC
             // check and stop image indicator
-            // 关闭
+            // 关闭加载指示器
             if (finished) {
                 [self sd_stopImageIndicator];
             }
 #endif
-            
+            // 是否回调
             BOOL shouldCallCompletedBlock = finished || (options & SDWebImageAvoidAutoSetImage);
             // SDWebImageAvoidAutoSetImage:避免自动设置image
             BOOL shouldNotSetImage = ((image && (options & SDWebImageAvoidAutoSetImage)) ||
@@ -167,7 +168,7 @@ const int64_t SDWebImageProgressUnitCountUnknown = 1LL;
             // case 1a: we got an image, but the SDWebImageAvoidAutoSetImage flag is set
             // OR
             // case 1b: we got no image and the SDWebImageDelayPlaceholder is not set
-            // 1.设置了自动设置image
+            // 1.设置了 避免自动设置image
             // 2.没获取到图片,并且占位图没有设置
             if (shouldNotSetImage) {
                 dispatch_main_async_safe(callCompletedBlockClojure);
