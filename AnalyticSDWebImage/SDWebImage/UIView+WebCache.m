@@ -67,7 +67,7 @@ const int64_t SDWebImageProgressUnitCountUnknown = 1LL;
     
     self.sd_latestOperationKey = validOperationKey;
     
-    // 取消加载
+    // 如果存在相同的下载任务先取消下载
     [self sd_cancelImageLoadOperationWithKey:validOperationKey];
     
     // imageURL
@@ -102,9 +102,11 @@ const int64_t SDWebImageProgressUnitCountUnknown = 1LL;
         if (!manager) {
             manager = [SDWebImageManager sharedManager];
         }
+        
         @weakify(self);
         
-        // 下载完成block
+        
+        // 下载进度的block
         SDImageLoaderProgressBlock combinedProgressBlock = ^(NSInteger receivedSize, NSInteger expectedSize, NSURL * _Nullable targetURL) {
             
             @strongify(self);
@@ -147,10 +149,13 @@ const int64_t SDWebImageProgressUnitCountUnknown = 1LL;
 #endif
             
             BOOL shouldCallCompletedBlock = finished || (options & SDWebImageAvoidAutoSetImage);
+            // SDWebImageAvoidAutoSetImage:避免自动设置image
             BOOL shouldNotSetImage = ((image && (options & SDWebImageAvoidAutoSetImage)) ||
                                       (!image && !(options & SDWebImageDelayPlaceholder)));
             SDWebImageNoParamsBlock callCompletedBlockClojure = ^{
                 if (!self) { return; }
+                
+                // 在下一个RunLoop周期更新
                 if (!shouldNotSetImage) {
                     [self sd_setNeedsLayout];
                 }
@@ -162,6 +167,8 @@ const int64_t SDWebImageProgressUnitCountUnknown = 1LL;
             // case 1a: we got an image, but the SDWebImageAvoidAutoSetImage flag is set
             // OR
             // case 1b: we got no image and the SDWebImageDelayPlaceholder is not set
+            // 1.设置了自动设置image
+            // 2.没获取到图片,并且占位图没有设置
             if (shouldNotSetImage) {
                 dispatch_main_async_safe(callCompletedBlockClojure);
                 return;

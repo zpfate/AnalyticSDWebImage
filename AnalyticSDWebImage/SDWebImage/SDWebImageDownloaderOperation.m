@@ -160,6 +160,8 @@ typedef NSMutableDictionary<NSString *, id> SDCallbacksDictionary;
             self.ownedSession = session;
         }
         
+        // 忽略缓存的response
+        // HTTP:
         if (self.options & SDWebImageDownloaderIgnoreCachedResponse) {
             // Grab the cached data for later check
             NSURLCache *URLCache = session.configuration.URLCache;
@@ -283,6 +285,7 @@ typedef NSMutableDictionary<NSString *, id> SDCallbacksDictionary;
           dataTask:(NSURLSessionDataTask *)dataTask
 didReceiveResponse:(NSURLResponse *)response
  completionHandler:(void (^)(NSURLSessionResponseDisposition disposition))completionHandler {
+    
     NSURLSessionResponseDisposition disposition = NSURLSessionResponseAllow;
     NSInteger expected = (NSInteger)response.expectedContentLength;
     expected = expected > 0 ? expected : 0;

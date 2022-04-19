@@ -73,6 +73,7 @@
         scale = MAX([scaleFactor doubleValue], 1) ;
     }
     
+    // 设置图片以及图片格式
     UIImage *image = [[UIImage alloc] initWithData:data scale:scale];
     image.sd_imageFormat = [NSData sd_imageFormatForImageData:data];
     return image;

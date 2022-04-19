@@ -136,7 +136,7 @@ static id<SDImageLoader> _defaultImageLoader;
         url = nil;
     }
 
-    // 加载和取消的operation, 可以用于取消加载
+    // 下载和取消的operation, 可以用于取消加载
     SDWebImageCombinedOperation *operation = [SDWebImageCombinedOperation new];
     operation.manager = self;
 
@@ -149,7 +149,7 @@ static id<SDImageLoader> _defaultImageLoader;
 
     if (url.absoluteString.length == 0 || (!(options & SDWebImageRetryFailed) && isFailedUrl)) {
         
-        // 加载失败
+        // 回调加载失败
         [self callCompletionBlockForOperation:operation completion:completedBlock error:[NSError errorWithDomain:SDWebImageErrorDomain code:SDWebImageErrorInvalidURL userInfo:@{NSLocalizedDescriptionKey : @"Image url is nil"}] url:url];
         
         return operation;
@@ -201,7 +201,7 @@ static id<SDImageLoader> _defaultImageLoader;
     // Check whether we should query cache
     BOOL shouldQueryCache = (options & SDWebImageFromLoaderOnly) == 0;
     
-    // 应该查看缓存有没有
+    // 查看缓存有没有
     if (shouldQueryCache) {
         
         id<SDWebImageCacheKeyFilter> cacheKeyFilter = context[SDWebImageContextCacheKeyFilter];
@@ -214,6 +214,7 @@ static id<SDImageLoader> _defaultImageLoader;
         // 查找缓存
         operation.cacheOperation = [self.imageCache queryImageForKey:key options:options context:context completion:^(UIImage * _Nullable cachedImage, NSData * _Nullable cachedData, SDImageCacheType cacheType) {
             
+            // 移除下载任务
             @strongify(operation);
             if (!operation || operation.isCancelled) {
                 [self safelyRemoveOperationFromRunning:operation];
@@ -221,6 +222,7 @@ static id<SDImageLoader> _defaultImageLoader;
             }
             
             // Continue download process
+            // 缓存中没有去下载
             [self callDownloadProcessForOperation:operation url:url options:options context:context cachedImage:cachedImage cachedData:cachedData cacheType:cacheType progress:progressBlock completed:completedBlock];
         }];
         

@@ -62,6 +62,7 @@
         NSAssert(ns, @"Cache namespace should not be nil");
         
         // Create IO serial queue
+        // 串行队列, 保证查询任务一个接一个  在不同的线程当中
         _ioQueue = dispatch_queue_create("com.hackemist.SDImageCache", DISPATCH_QUEUE_SERIAL);
         
         if (!config) {
@@ -219,6 +220,7 @@
         return;
     }
     NSUInteger cost = image.sd_memoryCost;
+    // 缓存的就是image
     [self.memCache setObject:image forKey:key cost:cost];
 }
 
@@ -290,9 +292,7 @@
 }
 
 - (nullable UIImage *)imageFromMemoryCacheForKey:(nullable NSString *)key {
-    
-    
-    
+    // 字典直接取
     return [self.memCache objectForKey:key];
 }
 
@@ -389,6 +389,7 @@
     // 先检查内存中有没有
     UIImage *image = [self imageFromMemoryCacheForKey:key];
 
+    // 动图第一帧
     if ((options & SDImageCacheDecodeFirstFrameOnly) && image.sd_isAnimated) {
 #if SD_MAC
         image = [[NSImage alloc] initWithCGImage:image.CGImage scale:image.scale orientation:kCGImagePropertyOrientationUp];
@@ -420,8 +421,10 @@
             return;
         }
         
+        // 查询磁盘缓存的任务
+        // NSData -- UIImage
+        // @autoreleasepool及时释放临时变量
         @autoreleasepool {
-            
             
             NSData *diskData = [self diskImageDataBySearchingAllPathsForKey:key];
             UIImage *diskImage;
@@ -457,6 +460,7 @@
     };
     
     // Query in ioQueue to keep IO-safe
+    // 是否是同步执行
     if (shouldQueryDiskSync) {
         dispatch_sync(self.ioQueue, queryDiskBlock);
     } else {
@@ -640,10 +644,13 @@
     
     // cacheOptions
     SDImageCacheOptions cacheOptions = 0;
+    // 设置缓存策略, 默认使用内存缓存
     
+    // 需要查询磁盘缓存
     if (options & SDWebImageQueryMemoryData)
         cacheOptions |= SDImageCacheQueryMemoryData;
     
+    // 是否需要同步查询: 标识当前任务是否异步执行
     if (options & SDWebImageQueryMemoryDataSync)
         cacheOptions |= SDImageCacheQueryMemoryDataSync;
     
