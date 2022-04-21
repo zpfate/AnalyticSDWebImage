@@ -74,7 +74,7 @@ const int64_t SDWebImageProgressUnitCountUnknown = 1LL;
     // imageURL
     self.sd_imageURL = url;
     
-    //  配置了延迟加载占位图设置
+    //  没有配置延迟加载占位图设置 先去主队列展示占位图
     if (!(options & SDWebImageDelayPlaceholder)) {
         
         // 回到主线程主队列

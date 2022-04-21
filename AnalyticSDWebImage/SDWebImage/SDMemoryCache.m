@@ -53,6 +53,7 @@ static void * SDMemoryCacheContext = &SDMemoryCacheContext;
     
     // NSDcitionary: key和value, key添加时引用计数+1, value不变, 应该是这个意思
     self.weakCache = [[NSMapTable alloc] initWithKeyOptions:NSPointerFunctionsStrongMemory valueOptions:NSPointerFunctionsWeakMemory capacity:0];
+    
     self.weakCacheLock = dispatch_semaphore_create(1);
     
     SDImageCacheConfig *config = self.config;
